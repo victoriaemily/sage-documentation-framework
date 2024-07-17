@@ -21,8 +21,8 @@ export const NavigationBar = () => {
     return (
         <>
             <Navbar bg="primary" variant="dark" className="navbarStyle">
-                <a className="navbar-brand" href="/">
-                    Microsoft identity platform
+                <a className="navbar-brand ml-3" href="/">
+                    Trade Surveillance
                 </a>
                 <AuthenticatedTemplate>
                     <div className="collapse navbar-collapse justify-content-end">

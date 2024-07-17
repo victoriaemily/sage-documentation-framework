@@ -1,38 +1,32 @@
-import { AuthenticatedTemplate } from '@azure/msal-react';
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
 
-import { NavigationBar } from './NavigationBar.jsx';
+import React from "react";
+import Navbar from "react-bootstrap/Navbar";
 
+import { useIsAuthenticated } from "@azure/msal-react";
+import { SignInButton } from "./SignInButton";
+import { SignOutButton } from "./SignOutButton";
+
+/**
+ * Renders the navbar component with a sign in or sign out button depending on whether or not a user is authenticated
+ * @param props
+ */
 export const PageLayout = (props) => {
-    /**
-     * Most applications will need to conditionally render certain components based on whether a user is signed in or not.
-     * msal-react provides 2 easy ways to do this. AuthenticatedTemplate and UnauthenticatedTemplate components will
-     * only render their children if a user is authenticated or unauthenticated, respectively.
-     */
-    return (
-        <>
-            <NavigationBar />
-            <br />
-            <h5>
-                <center>Welcome to the Microsoft Authentication Library For React Tutorial</center>
-            </h5>
-            <br />
-            {props.children}
-            <br />
-            <AuthenticatedTemplate>
-                <footer>
-                    <center>
-                        How did we do?
-                        <a
-                            href="https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR_ivMYEeUKlEq8CxnMPgdNZUNDlUTTk2NVNYQkZSSjdaTk5KT1o4V1VVNS4u"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                        >
-                            {' '}
-                            Share your experience!
-                        </a>
-                    </center>
-                </footer>
-            </AuthenticatedTemplate>
-        </>
-    );
-}   
+  const isAuthenticated = useIsAuthenticated();
+
+  return (
+    <>
+      <Navbar bg="primary" variant="dark" className="navbarStyle">
+        <a className="navbar-brand ml-5 font-semibold" href="/">
+          Trade Surveillance
+        </a>
+        {isAuthenticated ? <SignOutButton /> : <SignInButton />}
+
+      </Navbar>
+      {props.children}
+    </>
+  );
+};

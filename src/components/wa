@@ -1,0 +1,93 @@
+import React, { useState } from 'react';
+
+  import { PageLayout } from './components/PageLayout';
+  import { loginRequest } from './authConfig';
+  import { callMsGraph, callMsGraphSite, callMsGraphDrive, callMsGraphSiteDrive, callMsGraphSiteID, fetchDriveItems } from './graph';
+  import { ProfileData } from './components/ProfileData';
+  import RecursiveComponent from './components/RecursiveComponent';
+  import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
+
+  import './styles/App.css';
+
+  import Button from 'react-bootstrap/Button';
+
+  /**
+* Renders information about the signed-in user or a button to retrieve data about the user
+*/
+const ProfileContent = () => {
+    const { instance, accounts } = useMsal();
+    const [graphData, setGraphData] = useState(null);
+    const [driveItems, setDriveItems] = useState(null);
+    const driveId = 'b!x1FJzxQnaUW2L5SE8ZwTqaziwPyZpKpEh43Mfj9DGQ8KbKwh-ot4T72JMtqOhbJR';
+
+    const RequestProfileData = () => {
+        instance.acquireTokenSilent({
+            ...loginRequest,
+            account: accounts[0],
+        })
+        .then((response) => {
+            callMsGraphSiteID(response.accessToken).then((response) => {
+                setGraphData(response);
+                console.log(response.accessToken);
+                fetchDriveItems(response.accessToken, driveId).then((items) => {
+                    setDriveItems(items.value);
+                });
+            });
+        });
+    };
+
+    return (
+        <>
+            <h5 className="card-title">Welcome {accounts[0].name}</h5>
+            <br/>
+            {graphData ? (
+                <div>
+                    <ProfileData graphData={graphData} />
+                    {driveItems && driveItems.map(item => (
+                        <RecursiveComponent
+                            key={item.id}
+                            accessToken={graphData.accessToken}
+                            driveId={driveId}
+                            item={item}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <Button variant="secondary" onClick={RequestProfileData}>
+                    Request Profile Information
+                </Button>
+            )}
+        </>
+    );
+};
+
+/**
+* If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
+*/
+const MainContent = () => {
+    return (
+        <div className="App">
+            <AuthenticatedTemplate>
+                <ProfileContent />
+            </AuthenticatedTemplate>
+
+            <UnauthenticatedTemplate>
+                <h5>
+                    <center>
+                        Please sign-in to see your profile information.
+                    </center>
+                </h5>
+            </UnauthenticatedTemplate>
+        </div>
+    );
+};
+
+export default function App() {
+    return (
+        <PageLayout>
+            <center>
+                <MainContent />
+            </center>
+        </PageLayout>
+    );
+}
